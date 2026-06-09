@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Interview Question Generator</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    width:700px;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+}
+
+input, select, textarea{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+}
+
+textarea{
+    height:120px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.generate-btn{
+    background:#007bff;
+}
+
+.evaluate-btn{
+    background:#28a745;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+.section{
+    margin-top:20px;
+}
+
+.output{
+    margin-top:10px;
+    background:#f8f9fa;
+    padding:15px;
+    border-radius:10px;
+    white-space:pre-wrap;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>AI Interview Question Generator</h1>
+
+<input
+type="text"
+id="role"
+placeholder="Enter Role (Python, Java, Data Analyst...)">
+
+<select id="difficulty">
+<option>Easy</option>
+<option>Medium</option>
+<option>Hard</option>
+</select>
+
+<button
+class="generate-btn"
+onclick="generateQuestion()">
+Generate Questions
+</button>
+
+<div class="section">
+    <h3>Generated Questions</h3>
+    <div id="questions" class="output"></div>
+</div>
+
+<div class="section">
+    <h3>Your Answer</h3>
+
+    <textarea
+    id="answer"
+    placeholder="Paste one generated question above and write your answer here..."></textarea>
+
+    <button
+    class="evaluate-btn"
+    onclick="evaluateAnswer()">
+    Evaluate Answer
+    </button>
+</div>
+
+<div class="section">
+    <h3>AI Evaluation</h3>
+    <div id="evaluation" class="output"></div>
+</div>
+
+</div>
+
+<script>
+
+let latestQuestion = "";
+
+async function generateQuestion(){
+
+    const role =
+    document.getElementById("role").value;
+
+    const difficulty =
+    document.getElementById("difficulty").value;
+
+    document.getElementById("questions").innerText =
+    "Generating questions...";
+
+    try{
+
+        const response = await fetch(
+        "http://127.0.0.1:5000/get-question",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                role:role,
+                difficulty:difficulty
+            })
+        });
+
+        const data = await response.json();
+
+        latestQuestion = data.question;
+
+        document.getElementById("questions").innerText =
+        data.question;
+
+    }
+    catch(error){
+
+        document.getElementById("questions").innerText =
+        "Error connecting backend";
+    }
+}
+
+async function evaluateAnswer(){
+
+    const answer =
+    document.getElementById("answer").value;
+
+    document.getElementById("evaluation").innerText =
+    "Evaluating answer...";
+
+    try{
+
+        const response = await fetch(
+        "http://127.0.0.1:5000/evaluate-answer",
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                question:latestQuestion,
+                answer:answer
+            })
+        });
+
+        const data = await response.json();
+
+        document.getElementById("evaluation").innerText =
+        data.evaluation;
+
+    }
+    catch(error){
+
+        document.getElementById("evaluation").innerText =
+        "Evaluation failed";
+    }
+}
+
+</script>
+
+</body>
+</html>
